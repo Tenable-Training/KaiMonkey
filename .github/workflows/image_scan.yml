@@ -4,9 +4,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Pull OWASP WebGoat Docker image
+      run: docker pull owasp/webgoat:latest
     - name: Scan container image with Tenable Cloud Security
       uses: ermetic/actions/container-image/scan@v1
       with:
         api-token: ${{ secrets.TENABLE_API_TOKEN }}
         api-url: https://us2.app.ermetic.com
-        name: owasp/webgoat
+        name: owasp/webgoat:latest
