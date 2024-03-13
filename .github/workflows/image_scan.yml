@@ -3,7 +3,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@4
+    - uses: actions/checkout@4.11
     - name: Scan container image with Tenable Cloud Security
       uses: ermetic/actions/container-image/scan@v1
       with:
