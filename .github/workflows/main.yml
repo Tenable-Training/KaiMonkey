@@ -1,4 +1,7 @@
-on: push
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '1 */6 * * *'
 jobs:
   deploy:
     runs-on: ubuntu-latest  # Specify the type of virtual host machine to run the job on
