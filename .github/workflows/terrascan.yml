@@ -22,15 +22,6 @@ jobs:
           echo "Looking inside '${{ matrix.iac_type }}'"
           find ${{ matrix.iac_type }} -type f \( -name "*.tf" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \)
 
-      - name: Run Terrascan for ${{ matrix.iac_type }}
-        id: terrascan
-        uses: accurics/terrascan-action@main
-        with:
-          iac_type: ${{ matrix.iac_type }}
-          iac_dir: ${{ matrix.iac_type }}
-          only_warn: true
-          sarif_upload: true
-
       - name: Run Terrascan via Docker
         run: |
           docker run --rm \
@@ -38,22 +29,13 @@ jobs:
             -w /iac \
             accurics/terrascan \
             scan -i ${{ matrix.iac_type }} -d . -o sarif > terrascan-${{ matrix.iac_type }}.sarif
-      
 
-      - name: Check and rename SARIF output
-        run: |
-          if [ -s terrascan.sarif ]; then
-            mv terrascan.sarif terrascan-${{ matrix.iac_type }}.sarif
-          else
-            echo "❌ SARIF file is missing or empty for ${{ matrix.iac_type }}"
-            exit 1
-          fi
-
-      - name: Debug renamed SARIF file
+      - name: Debug SARIF output
         if: always()
         run: |
-          echo "Contents of terrascan-${{ matrix.iac_type }}.sarif:"
-          cat terrascan-${{ matrix.iac_type }}.sarif || echo "SARIF file not found"
+          echo "Checking SARIF output for ${{ matrix.iac_type }}"
+          ls -l terrascan-${{ matrix.iac_type }}.sarif || echo "File not found"
+          cat terrascan-${{ matrix.iac_type }}.sarif || echo "File is empty"
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
