@@ -19,7 +19,7 @@ jobs:
 
       - name: Run Terrascan for ${{ matrix.iac_type }}
         id: terrascan
-        uses: accurics/terrascan-action@v3
+        uses: accurics/terrascan-action@main
         with:
           iac_type: ${{ matrix.iac_type }}
           iac_dir: ${{ matrix.iac_type }}
