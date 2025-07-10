@@ -6,6 +6,7 @@ jobs:
       contents: write
       pull-requests: write
       repository-projects: write
+      security-events: write
     name: terrascan-terraform
     steps:
     - name: Checkout repository
