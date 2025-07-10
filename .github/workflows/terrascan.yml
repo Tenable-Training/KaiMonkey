@@ -31,6 +31,15 @@ jobs:
           only_warn: true
           sarif_upload: true
 
+      - name: Run Terrascan via Docker
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/iac \
+            -w /iac \
+            accurics/terrascan \
+            scan -i ${{ matrix.iac_type }} -d . -o sarif > terrascan-${{ matrix.iac_type }}.sarif
+      
+
       - name: Check and rename SARIF output
         run: |
           if [ -s terrascan.sarif ]; then
