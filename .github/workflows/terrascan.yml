@@ -26,7 +26,10 @@ jobs:
           only_warn: true
           sarif_upload: true
           output_file: terrascan-${{ matrix.iac_type }}.sarif
-
+          
+      - name: Rename SARIF output
+        run: mv terrascan.sarif terrascan-${{ matrix.iac_type }}.sarif
+        
       - name: Debug SARIF output
         if: always()
         run: |
