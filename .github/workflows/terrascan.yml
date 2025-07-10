@@ -4,7 +4,7 @@ on: [push]
 
 permissions:
   contents: read
-  security-events: write  # Required to upload SARIF files
+  security-events: write
 
 jobs:
   terrascan:
@@ -17,6 +17,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: List IaC files in ${{ matrix.iac_type }}
+        run: |
+          echo "Looking inside '${{ matrix.iac_type }}'"
+          find ${{ matrix.iac_type }} -type f \( -name "*.tf" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \)
+
       - name: Run Terrascan for ${{ matrix.iac_type }}
         id: terrascan
         uses: accurics/terrascan-action@main
@@ -25,25 +30,21 @@ jobs:
           iac_dir: ${{ matrix.iac_type }}
           only_warn: true
           sarif_upload: true
-          output_file: terrascan-${{ matrix.iac_type }}.sarif
 
-      - name: Debug SARIF output 1
+      - name: Check and rename SARIF output
+        run: |
+          if [ -s terrascan.sarif ]; then
+            mv terrascan.sarif terrascan-${{ matrix.iac_type }}.sarif
+          else
+            echo "❌ SARIF file is missing or empty for ${{ matrix.iac_type }}"
+            exit 1
+          fi
+
+      - name: Debug renamed SARIF file
         if: always()
         run: |
-          echo "Files in workspace:"
-          ls -lh
-          echo "SARIF contents:"
-          cat terrascan.sarif || echo "SARIF file not found"
-
-      - name: Rename SARIF output
-        run: mv terrascan.sarif terrascan-${{ matrix.iac_type }}.sarif
-        
-      - name: Debug SARIF output 2
-        if: always()
-        run: |
-          echo "Checking SARIF output for ${{ matrix.iac_type }}"
-          ls -l terrascan-${{ matrix.iac_type }}.sarif || echo "File not found"
-          cat terrascan-${{ matrix.iac_type }}.sarif || echo "File is empty"
+          echo "Contents of terrascan-${{ matrix.iac_type }}.sarif:"
+          cat terrascan-${{ matrix.iac_type }}.sarif || echo "SARIF file not found"
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
