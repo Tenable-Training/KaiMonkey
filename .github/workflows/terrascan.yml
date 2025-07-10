@@ -26,11 +26,19 @@ jobs:
           only_warn: true
           sarif_upload: true
           output_file: terrascan-${{ matrix.iac_type }}.sarif
-          
+
+      - name: Debug SARIF output 1
+        if: always()
+        run: |
+          echo "Files in workspace:"
+          ls -lh
+          echo "SARIF contents:"
+          cat terrascan.sarif || echo "SARIF file not found"
+
       - name: Rename SARIF output
         run: mv terrascan.sarif terrascan-${{ matrix.iac_type }}.sarif
         
-      - name: Debug SARIF output
+      - name: Debug SARIF output 2
         if: always()
         run: |
           echo "Checking SARIF output for ${{ matrix.iac_type }}"
