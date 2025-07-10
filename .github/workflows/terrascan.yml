@@ -27,11 +27,12 @@ jobs:
         uses: tenable/terrascan-action@main
         with:
           iac_type: ${{ matrix.iac_type }}
-          iac_version: v14
+          iac_dir: ${{ matrix.iac_type }}
           policy_type: aws
           only_warn: true
           sarif_upload: true
-          iac_dir: ${{ matrix.iac_type }}
+          # Only add iac_version for Terraform
+          iac_version: ${{ matrix.iac_type == 'terraform' && 'v14' || '' }}
 
       - name: Check SARIF output
         run: |
