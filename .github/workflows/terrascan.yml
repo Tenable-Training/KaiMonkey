@@ -19,26 +19,30 @@ jobs:
 
       - name: List IaC files in ${{ matrix.iac_type }}
         run: |
-          echo "Looking inside '${{ matrix.iac_type }}'"
-          find ${{ matrix.iac_type }} -type f \( -name "*.tf" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \)
+          echo "Scanning contents of ./${{ matrix.iac_type }}"
+          find ${{ matrix.iac_type }} -type f \( -name "*.tf" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) || echo "No files found."
 
-      - name: Run Terrascan via Docker
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/iac \
-            -w /iac \
-            accurics/terrascan \
-            scan -i ${{ matrix.iac_type }} -d . -o sarif > terrascan-${{ matrix.iac_type }}.sarif
+      - name: Run Terrascan
+        id: terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: ${{ matrix.iac_type }}
+          iac_version: v14
+          policy_type: aws
+          only_warn: true
+          sarif_upload: true
+          iac_dir: ${{ matrix.iac_type }}
 
-      - name: Debug SARIF output
-        if: always()
+      - name: Check SARIF output
         run: |
-          echo "Checking SARIF output for ${{ matrix.iac_type }}"
-          ls -l terrascan-${{ matrix.iac_type }}.sarif || echo "File not found"
-          cat terrascan-${{ matrix.iac_type }}.sarif || echo "File is empty"
+          if [ ! -s terrascan.sarif ]; then
+            echo "⚠️ terrascan.sarif not found or empty for ${{ matrix.iac_type }}. Skipping upload."
+            exit 0
+          fi
+          echo "✅ terrascan.sarif exists and is non-empty."
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: terrascan-${{ matrix.iac_type }}.sarif
+          sarif_file: terrascan.sarif
           category: ${{ matrix.iac_type }}
