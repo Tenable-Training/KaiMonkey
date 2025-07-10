@@ -2,6 +2,10 @@ on: [push]
 jobs:
   terrascan_terraform_job:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
     name: terrascan-terraform
     steps:
     - name: Checkout repository
@@ -21,6 +25,10 @@ jobs:
         sarif_file: terrascan.sarif
   terrascan_cft_job:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
     name: terrascan-cft
     steps:
     - name: Checkout repository
