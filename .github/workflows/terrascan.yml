@@ -24,8 +24,10 @@ jobs:
 
       - name: Run Terrascan
         id: terrascan
-        uses: tenable/terrascan-action@main
+        uses: tenable/cloud-security-actions/iac/scan@v1
         with:
+          api-token: ${{ secrets.TENABLE_API_TOKEN }}
+          api-url: https://us2.app.ermetic.com
           iac_type: ${{ matrix.iac_type }}
           iac_dir: ${{ matrix.iac_type }}
           policy_type: aws
