@@ -1,4 +1,4 @@
-name: Terrascan Code Scan
+name: Terrascan Code Scan 
 
 on: [push]
 
