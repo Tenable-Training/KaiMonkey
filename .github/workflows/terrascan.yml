@@ -32,11 +32,11 @@ jobs:
         with:
           api-token: ${{ secrets.TENABLE_API_TOKEN }}
           api-url: https://us2.app.ermetic.com
-          types: ${{ matrix.iac_type }}
+          types: ${{ matrix.iac_type == 'cft' && 'CloudFormation' || 'Terraform' }}
           path: ${{ matrix.iac_type }}
           output-file-formats: sarif
           output-file-name: terrascan
-          fail-on-min-severity: none
+          fail-on-min-severity: Critical
 
       - name: Check SARIF output
         run: |
