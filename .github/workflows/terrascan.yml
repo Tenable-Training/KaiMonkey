@@ -50,6 +50,7 @@ jobs:
         if: success()
         run: |
           if [ -f terrascan.sarif ]; then
+            chmod 666 terrascan.sarif
             python3 << 'EOF'
           import json
           import re
@@ -76,11 +77,12 @@ jobs:
                                   # Fallback: just take everything after last domain segment
                                   artifact_location['uri'] = uri.split('/')[-1]
           
-          with open('terrascan.sarif', 'w') as f:
+          with open('terrascan_fixed.sarif', 'w') as f:
               json.dump(sarif, f, indent=2)
           
           print("✅ Fixed SARIF URI schemes")
           EOF
+            mv terrascan_fixed.sarif terrascan.sarif
           fi
 
       - name: Upload SARIF to GitHub
