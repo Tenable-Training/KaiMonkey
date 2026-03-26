@@ -32,13 +32,11 @@ jobs:
         with:
           api-token: ${{ secrets.TENABLE_API_TOKEN }}
           api-url: https://us2.app.ermetic.com
-          iac_type: ${{ matrix.iac_type }}
-          iac_dir: ${{ matrix.iac_type }}
-          policy_type: aws
-          only_warn: true
-          sarif_upload: true
-          # Only add iac_version for Terraform
-          iac_version: ${{ matrix.iac_type == 'terraform' && 'v14' || '' }}
+          types: ${{ matrix.iac_type }}
+          path: ${{ matrix.iac_type }}
+          output-file-formats: sarif
+          output-file-name: terrascan
+          fail-on-min-severity: none
 
       - name: Check SARIF output
         run: |
