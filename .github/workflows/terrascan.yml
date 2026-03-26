@@ -50,11 +50,37 @@ jobs:
         if: success()
         run: |
           if [ -f terrascan.sarif ]; then
-            # Convert SARIF URIs from https:// to relative file:// paths
-            sed -i 's|"uri": "https://[^"]*\/\([^"]*\)"|"uri": "file:///github/workspace/\1"|g' terrascan.sarif
-            # Alternative: make them relative paths
-            sed -i 's|"uri": "file:///github/workspace/||g' terrascan.sarif
-            echo "✅ Fixed SARIF URI schemes"
+            python3 << 'EOF'
+          import json
+          import re
+          
+          with open('terrascan.sarif', 'r') as f:
+              sarif = json.load(f)
+          
+          # Fix URI schemes in all results
+          for run in sarif.get('runs', []):
+              for result in run.get('results', []):
+                  for location in result.get('locations', []):
+                      physical_location = location.get('physicalLocation', {})
+                      artifact_location = physical_location.get('artifactLocation', {})
+                      
+                      if 'uri' in artifact_location:
+                          uri = artifact_location['uri']
+                          # Extract just the file path from https:// URIs
+                          if uri.startswith('https://'):
+                              # Extract the path after the domain/repo
+                              match = re.search(r'https://[^/]+/[^/]+/[^/]+/(.+)', uri)
+                              if match:
+                                  artifact_location['uri'] = match.group(1)
+                              else:
+                                  # Fallback: just take everything after last domain segment
+                                  artifact_location['uri'] = uri.split('/')[-1]
+          
+          with open('terrascan.sarif', 'w') as f:
+              json.dump(sarif, f, indent=2)
+          
+          print("✅ Fixed SARIF URI schemes")
+          EOF
           fi
 
       - name: Upload SARIF to GitHub
