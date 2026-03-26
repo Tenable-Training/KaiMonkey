@@ -50,11 +50,12 @@ jobs:
         if: success()
         run: |
           if [ -f terrascan.sarif ]; then
-            chmod 666 terrascan.sarif
             python3 << 'EOF'
           import json
           import re
+          import os
           
+          # Read the original SARIF file
           with open('terrascan.sarif', 'r') as f:
               sarif = json.load(f)
           
@@ -77,12 +78,16 @@ jobs:
                                   # Fallback: just take everything after last domain segment
                                   artifact_location['uri'] = uri.split('/')[-1]
           
+          # Write to temp file, then replace
           with open('terrascan_fixed.sarif', 'w') as f:
               json.dump(sarif, f, indent=2)
           
+          # Remove original and rename fixed version
+          os.remove('terrascan.sarif')
+          os.rename('terrascan_fixed.sarif', 'terrascan.sarif')
+          
           print("✅ Fixed SARIF URI schemes")
           EOF
-            mv terrascan_fixed.sarif terrascan.sarif
           fi
 
       - name: Upload SARIF to GitHub
