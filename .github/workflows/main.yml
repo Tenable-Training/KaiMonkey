@@ -1,7 +1,7 @@
 on:
   schedule:
-    # * is a special character in YAML so you have to quote this string  
-    - cron:  '1 */6 * * *'
+    # Runs every Monday at 9 AM UTC (weekly)
+    - cron:  '0 9 * * 1'
 jobs:
   deploy:
     runs-on: ubuntu-latest  # Specify the type of virtual host machine to run the job on
