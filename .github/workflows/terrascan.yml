@@ -46,8 +46,20 @@ jobs:
           fi
           echo "✅ terrascan.sarif exists and is non-empty."
 
+      - name: Fix SARIF URI schemes for GitHub Code Scanning
+        if: success()
+        run: |
+          if [ -f terrascan.sarif ]; then
+            # Convert SARIF URIs from https:// to relative file:// paths
+            sed -i 's|"uri": "https://[^"]*\/\([^"]*\)"|"uri": "file:///github/workspace/\1"|g' terrascan.sarif
+            # Alternative: make them relative paths
+            sed -i 's|"uri": "file:///github/workspace/||g' terrascan.sarif
+            echo "✅ Fixed SARIF URI schemes"
+          fi
+
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@v3
+        if: success()
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: terrascan.sarif
           category: ${{ matrix.iac_type }}
