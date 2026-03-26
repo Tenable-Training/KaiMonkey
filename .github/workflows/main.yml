@@ -2,13 +2,23 @@ on:
   schedule:
     # Runs every Monday at 9 AM UTC (weekly)
     - cron:  '0 9 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Specify the type of virtual host machine to run the job on
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Scan IaC with Tenable Cloud Security
-        uses: ermetic/actions/iac/scan@v1
+        uses: tenable/cloud-security-actions/iac/scan@v1
         with:
           api-token: ${{ secrets.TENABLE_API_TOKEN }}
           api-url: https://us2.app.ermetic.com
+          types: Terraform,CloudFormation
+          path: .
+          fail-on-min-severity: Critical
